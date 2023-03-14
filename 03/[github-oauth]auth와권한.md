@@ -61,12 +61,12 @@ useEffect(() => {
       const { token } = result.data;
 
       localStorage.setItem("gh-token", token);
+      navigate("/test", { replace: true }); // ✨✨ 뒤로가기 막아서 배드리퀘스트 방지
     } catch (error) {
       console.log(error);
     }
   };
   getToken();
-  navigate("/test", { replace: true }); // ✨✨ 뒤로가기 막아서 배드리퀘스트 방지
 }, [code, navigate]);
 ```
 
