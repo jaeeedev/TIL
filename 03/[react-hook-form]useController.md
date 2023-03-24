@@ -42,7 +42,7 @@ const Input = ({ name, control, rules, placeholder }) => {
   const {
     field,
     fieldState,
-    formState: { isDirty, isTouched, error, isValid, isValidating },
+    formState: { error },
   } = useController({
     name,
     control,
