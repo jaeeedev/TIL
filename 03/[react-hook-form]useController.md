@@ -41,8 +41,13 @@ import { useController } from "react-hook-form";
 const Input = ({ name, control, rules, placeholder }) => {
   const {
     field,
+<<<<<<< HEAD
     fieldState,
     formState: { error },
+=======
+    fieldState: { isDirty, isTouched, error, isValid, isValidating },
+    formState,
+>>>>>>> c89d11e843708b3d9f0453cb4e038cbeb6c2c4a4
   } = useController({
     name,
     control,
