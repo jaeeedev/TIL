@@ -43,9 +43,9 @@ export function useReserveAppointment(): UseMutateFunction<
 useMutation을 실행하는 커스텀 훅
 `UseMutateFunction` 타입은 `TData`, `TError`, `TVariables`, `TContext` 네가지 제네릭을 가진다.
 
-> `TData`는 setAppointmentUser가 반환하는 데이터(없으니까 void)  
+> `TData`는 queryFn(useMutation에 전달되는 함수)이 반환하는 데이터(없으니까 void)  
 > `TError`는 에러의 타입  
-> `TVariables`는 setAppointmentUser에 전달되는 인수의 타입  
+> `TVariables`는 queryFn에 전달되는 인수의 타입  
 > `TContext`는 onMutate가 반환하는 context의 타입
 
 ### unknown 타입
