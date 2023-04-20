@@ -63,6 +63,17 @@ const defaultColDef = useMemo(() => ({
 
 `useState`와 `useMemo`를 사용하지 않는 경우 렌더링이 될 때 변수가 새로 만들어지면서 테이블의 설정이 변경되는 등 예상치 못한 문제가 발생할 수 있음
 
+```jsx
+  const buttonListener = useCallback((e) => {
+    gridRef.current.api.deselectAll();
+  }, []);
+
+  ...
+   <button onClick={buttonListener}>click</button>
+```
+
+`deselectAll`은 선택된 체크박스를 모두 해제하는 메서드이다
+
 ### 전체 코드
 
 ```jsx
@@ -119,6 +130,13 @@ const Table = () => {
 };
 export default Table;
 ```
+
+![image](https://user-images.githubusercontent.com/72128840/233227259-f595f249-ebf4-4e6c-be98-9b7075dd7bb8.png)
+
+전체 코드를 조합하면 이런 테이블이 완성된다.
+
+[grid(테이블) api 관련 공식문서](https://www.ag-grid.com/react-data-grid/grid-interface/)  
+[column api 관련 공식문서](https://www.ag-grid.com/react-data-grid/column-interface/)
 
 ## column 움직임(드래그) 막기
 
@@ -181,8 +199,6 @@ const [columnDefs, setColumnDefs] = useState([
 
 `headerCheckboxSelection: true` 는 헤더에 체크박스(전체선택)추가 `checkboxSelection`는 개별 row에 체크박스 추가
 
-## 체크박스 이벤트 추가하기
-
 ## n개씩 보기(pagination)
 
 페이지네이션으로 몇개씩 보이도록 할 수 있다
@@ -228,4 +244,73 @@ const changePerPage = useCallback((e) => {
 체크 여부나 정렬된 상태까지 저장이 된 채로 리렌더링된다.  
 해당 페이지네이션 기능은 가장 상위의 row 개수만 셀 수 있어서 그룹화 된 row의 내부 개수까지는 세지 않는다
 
-to be continue...
+## 클릭된 리스트 정보 받기
+
+![image](https://user-images.githubusercontent.com/72128840/233229210-d313bc05-a17b-4230-aab9-8eef96940538.png)
+
+선택한 셀들을 전체 데이터에서 삭제하고 싶은 경우에 선택된 셀들의 정보를 알아야 한다. 이럴 때 `getSelectedRows` 메서드를 이용할 수 있다.
+
+```jsx
+const onSelectionChanged = useCallback(() => {
+  const selectedNodes = gridRef.current.api.getSelectedRows();
+  console.log(selectedNodes);
+}, []);
+
+...
+   <AgGridReact
+        ...
+          onSelectionChanged={onSelectionChanged}
+        />
+```
+
+클릭된 데이터들이 배열로 출력된다.
+
+![image](https://user-images.githubusercontent.com/72128840/233236771-3d6745f9-184b-4ffe-b23b-15b00bdc4c14.png)
+
+만약 데이터뿐만이 아니라 선택된 셀에 관한 정보까지 다 필요하다면 `getSelectedRows` 대신 `getSelectedNodes` 를 사용할 수 있다.
+
+![image](https://user-images.githubusercontent.com/72128840/233236940-6c707e30-c906-4da3-8787-eefab1ef8518.png)
+
+## 엑셀 파일로 내보내기
+
+여기서 구현 안할수도 있는데 일단 테스트  
+(json -> excel은 아래 방법대로 하면 되는데 excel -> json은 모르겠음)
+
+```
+npm install xlsx
+```
+
+xlsx 설치한다
+
+```jsx
+import * as XLSX from "xlsx";
+
+...
+const downloadExcel = useCallback((data) => {
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "json_placeholder");
+  XLSX.writeFile(workbook, "json_placeholder.xlsx");
+}, []);
+
+...
+ <button
+        onClick={() => downloadExcel(gridRef.current.api.getSelectedRows())}
+      >
+        다운로드
+      </button>
+```
+
+다운로드 함수 작성해주고 버튼에 onClick 이벤트 발생 시 실행되도록 한다.
+
+![image](https://user-images.githubusercontent.com/72128840/233298291-e5df21f3-4585-4160-8b32-9f83198f3819.png)
+
+이렇게 선택하고 다운로드 버튼 누르면
+
+![image](https://user-images.githubusercontent.com/72128840/233298362-a90ea9a0-b1d5-41ee-8dc7-f7aa653cefda.png)
+
+다운로드가 된다
+
+![image](https://user-images.githubusercontent.com/72128840/233298488-74ce5964-613a-4303-a9d9-b58571f9e75a.png)
+
+선택한 데이터들만 잘 출력된 것을 확인할 수 있음
