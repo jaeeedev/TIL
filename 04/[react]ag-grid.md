@@ -314,3 +314,91 @@ const downloadExcel = useCallback((data) => {
 ![image](https://user-images.githubusercontent.com/72128840/233298488-74ce5964-613a-4303-a9d9-b58571f9e75a.png)
 
 선택한 데이터들만 잘 출력된 것을 확인할 수 있음
+
+## 셀 편집 가능하게 만들기
+
+`editable` 옵션 추가하기
+[Editing](https://www.ag-grid.com/react-data-grid/cell-editing/)
+
+```jsx
+  const defaultColDef = useMemo(
+    () => ({
+      ...
+      editable: true,
+    }),
+    [],
+  );
+```
+
+개별 column 옵션에 지정하면 그 컬럼만 변경 가능하다.
+
+### 셀이 변경됐을때 이벤트 실행하기
+
+`onCellValueChanged` 사용하기
+
+```jsx
+  const getChangedCell = useCallback((e) => {
+    console.log(e);
+  }, []);
+
+    <AgGridReact
+          ...
+          onCellValueChanged={getChangedCell}
+        />
+```
+
+이벤트(e) 파라미터에 이벤트 정보와 변경된 데이터가 저장되어 있다.
+
+### 행 추가하고 focus하기
+
+**행 추가하기**
+
+```jsx
+const addNewRow = () => {
+  setRowData((prev) => [
+    { id: 300, userId: 300, name: null, body: null },
+    ...prev,
+  ]);
+};
+
+<Button onClick={addNewRow}>행 추가하기</Button>;
+```
+
+먼저 행을 만든다. rowData 상태를 변경시켜서 새로운 행을 추가할 수 있다. 넘기는 데이터 포맷은 기존의 rowData와 같아야 한다.  
+현재 id와 userId 값은 임의로 주었다.  
+새로운 데이터를 입력할 수 있도록 작성해야 하는 값들은 null로 넘겨준다.
+
+![image](https://user-images.githubusercontent.com/72128840/233551470-c8fe6fbf-6362-4487-bf4d-9c5b31ae43e5.png)
+
+행 추가하기 버튼을 누르면 빈 행이 추가된다.
+
+**추가된 행에 포커스 주기, edit 상태로 만들기**  
+현재는 행이 추가만 되지 그 행을 바로 수정할 수 없는 상태기때문에 추가적인 작업이 필요하다.
+
+```jsx
+const editNewRow = () => {
+  gridRef.current.api.ensureIndexVisible(0); // 첫 행으로 스크롤 이동
+  gridRef.current.api.setFocusedCell(0, "name"); // name 컬럼의 첫번째 셀로 포커스 이동
+  gridRef.current.api.startEditingCell({
+    rowIndex: 0,
+    colKey: "name",
+  }); // name 컬럼의 첫번째 셀을 edit 상태로 변경
+};
+
+const addNewRow = () => {
+  setRowData((prev) => [
+    { id: 300, userId: 300, name: null, body: null },
+    ...prev,
+  ]);
+  setTimeout(() => {
+    editNewRow();
+  }, 0);
+};
+```
+
+useState 훅의 setState(지금 코드의 `setRowData`)는 모든 동기적인 동작들이 실행된 다음 마지막에 상태를 업데이트시킨다.  
+그렇기 때문에 화면을 먼저 업데이트하고 이어서 함수를 실행시키고 싶다면 `useEffect` 나 `setTimeout`을 이용해야 한다.
+현재 코드에서 `setTimeout`을 작성해주지 않으면 행 추가하기를 두번 해야 포커스와 에딧이 적용된다.
+
+![image](https://user-images.githubusercontent.com/72128840/233553992-46eedb58-a3f8-4d7f-a24b-fea1dcd0f3e4.png)
+행 추가하기 버튼을 누르면 바로 포커스가 이동하고 내용을 작성할 수 있다.
