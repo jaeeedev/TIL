@@ -398,7 +398,33 @@ const addNewRow = () => {
 
 useState 훅의 setState(지금 코드의 `setRowData`)는 모든 동기적인 동작들이 실행된 다음 마지막에 상태를 업데이트시킨다.  
 그렇기 때문에 화면을 먼저 업데이트하고 이어서 함수를 실행시키고 싶다면 `useEffect` 나 `setTimeout`을 이용해야 한다.
-현재 코드에서 `setTimeout`을 작성해주지 않으면 행 추가하기를 두번 해야 포커스와 에딧이 적용된다.
+현재 코드에서 `setTimeout`을 작성해주지 않으면 포커싱과 에딧이 제대로 동작하지 않는다.
 
 ![image](https://user-images.githubusercontent.com/72128840/233553992-46eedb58-a3f8-4d7f-a24b-fea1dcd0f3e4.png)
 행 추가하기 버튼을 누르면 바로 포커스가 이동하고 내용을 작성할 수 있다.
+
+- `flushSync` 사용하는 방법
+
+```jsx
+const addNewRow = () => {
+  flushSync(() => {
+    setRowData((prev) => [
+      { id: 300, userId: 300, name: null, body: null },
+      ...prev,
+    ]);
+  });
+  editNewRow();
+};
+```
+
+리액트18 에서 새로 추가된 기능이다.  
+state 업데이트를 동기적으로 만들 수 있다. 똑같이 잘 동작한다.
+
+**테이블 밖을 클릭했을 때 edit 끝내기**
+edit 상태인 셀은 다른 셀을 클릭하거나 엔터를 쳐야만 멈추고 테이블 바깥을 눌렀을때는 별다른 액션이 발생하지 않는데 edit 상태를 멈추고 싶을때 아래 프로퍼티를 추가한다.
+
+```jsx
+      <AgGridReact
+      ...
+            stopEditingWhenCellsLoseFocus={true}
+```
