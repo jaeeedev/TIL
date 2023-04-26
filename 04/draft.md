@@ -247,7 +247,7 @@ return () => {};
 컴포넌트가 언마운트(화면에서 사라지기 직전) 될때 함수를 실행시키고 싶을때 사용
 
 마지막에 있는 []는 `의존성 배열(deps)`이라고 부름  
-이 배열을 아예 빼버리면 상태가 업데이트 될 때 마다 내부에 선언한 함수가 실행됨  
+이 배열을 아예 빼버리면 상태가 업데이트 될 때 마다 콜백 함수가 실행됨  
 빈 값으로 두면 화면이 렌더링될 때 최초 1회 실행됨  
 안에 의존중인 상태(함수에서 사용하고있는 상태)를 넣어주면 그 상태가 변할때마다 실행
 
@@ -256,5 +256,60 @@ return () => {};
 useEffect가 꼭 필요한지 아닌지를 판단해서 사용하는것이 좋습니다.
 
 예를 들어 fetching을 하는 경우에는 `리액트 쿼리`,`swr`같은 라이브러리를 사용하면 useEffect를 제거할 수 있습니다.
+또한 상태가 변했을 때 어떤 함수를 실행시키기 보다는 이벤트 함수로 처리할 수 있다면 그렇게 하는것이 더 좋습니다.
 
 useEffect는 깊게 생각하면 생각할수록 어려우니까 단순히
+
+## useRef
+
+ref는 막 필수!!는 아닌데 나는 자주 쓰게되는것 같아서 설명
+
+```jsx
+import { useRef } from "react";
+
+const Component = () => {
+  const ref = useRef(null);
+
+  return (
+    <div>
+      <input ref={ref} />
+    </div>
+  );
+};
+```
+
+useRef를 선언하게되면 화면이 렌더링되면서 ref 객체를 만듭니다.  
+그리고 괄호 안에 넣었던 값으로 ref.current의 값을 초기화합니다.
+
+```jsx
+const ref = useRef(0);
+
+useEffect(() => {
+  console.log(ref.current); // 0
+}, []);
+```
+
+`useRef`는 렌더링과 관계 없이 변수를 사용하고 싶거나(앞서 리렌더링이 일어나면
+변수들이 모두 새로 만들어진다고 언급했습니다.) DOM에 직접 접근하고 싶은 경우 사용합니다.
+
+예를 들어 input 컴포넌트의 값을 받아와서 써야하는 경우가 생깁니다.  
+그럴 경우 useRef를 사용해 DOM에서 값을 받아올 수 있습니다.
+
+```jsx
+const ref = useRef(null);
+const getText = () => {
+  console.log(ref.current.value);
+};
+
+return (
+  <>
+    <input ref={ref} />
+    <button onClick={getText}>값 확인하기</button>
+  </>
+);
+```
+
+## 커스텀 훅
+
+컴포넌트 내에서 반복되는 로직을 함수로 분리할 수 있습니다.  
+꼭 함수의 이름을 `use`로 시작해야 합니다. ex) useCount, useInput
