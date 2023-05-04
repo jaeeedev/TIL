@@ -120,3 +120,34 @@ const customFetcher = async (url, ...rest) => {
 ```
 
 여기에 try catch구문도 넣어야할텐데
+
+- 위 코드대로 사용을 했더니 의도와 다르게 객체를 잘 찾지 못해서
+  살짝 수정해줬다.
+
+```jsx
+export const fetcher = async (url, ...rest) => {
+  const { method = "GET", body } = rest[0];
+
+  const axiosOptions = {
+    method,
+    url,
+  };
+
+  if (method) {
+    axiosOptions.method = method;
+  }
+
+  if (body) {
+    axiosOptions.data = body;
+  }
+
+  try {
+    const response = await axiosInstance(axiosOptions);
+    return response.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+```
+
+`rest[0]`으로 해야되더라
